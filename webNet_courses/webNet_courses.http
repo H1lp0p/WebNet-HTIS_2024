@@ -1,0 +1,6 @@
+@webNet_courses_HostAddress = http://localhost:5082
+
+GET {{webNet_courses_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
