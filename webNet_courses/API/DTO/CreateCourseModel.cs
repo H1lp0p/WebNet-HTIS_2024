@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using webNet_courses.Domain.Enumerations;
 
-namespace webNet_courses.Domain.Entities
+namespace webNet_courses.API.DTO
 {
-	public class CampusCourse
+	public class CreateCourseModel
 	{
-		public Guid Id { get; set; }
-
 		[Required]
 		public string Name { get; set; }
 
@@ -30,10 +28,6 @@ namespace webNet_courses.Domain.Entities
 		public Semester Semester { get; set; }
 
 		[Required]
-		public CourseStatuses Status { get; set; } = CourseStatuses.Created;
-
-		public ICollection<CampusCourseTeacher> Teachers { get; set; } = new List<CampusCourseTeacher>();
-
-		public ICollection<CampusCourseStudent> Students { get; set; } = new List<CampusCourseStudent>();
+		public Guid MainTeacherId { get; set; }
 	}
 }

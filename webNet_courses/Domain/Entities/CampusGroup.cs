@@ -4,6 +4,8 @@ namespace webNet_courses.Domain.Entities
 {
 	public class CampusGroup
 	{
+		public Guid Id { get; set; }
+
 		[Required]
 		public string Name {  get; set; }
 

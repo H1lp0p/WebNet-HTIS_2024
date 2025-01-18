@@ -3,11 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace webNet_courses.Domain.Entities
 {
-	public class Role
-	{
-		public string Name { get; set; }
-	}
-
 	public class User : IdentityUser<Guid>
 	{
 		[Required]
@@ -23,7 +18,5 @@ namespace webNet_courses.Domain.Entities
 		public ICollection<CampusCourseTeacher> TeachingCourses { get; set; } = new List<CampusCourseTeacher>();
 
 		public ICollection<CampusCourseStudent> LearningCourses { get; set; } = new List<CampusCourseStudent>();
-
-		public ICollection<Role> Roles { get; set; } = new List<Role>();
 	}
 }

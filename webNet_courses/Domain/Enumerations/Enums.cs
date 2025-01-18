@@ -20,7 +20,7 @@
 		Spring
 	}
 
-	public enum CourseStuses
+	public enum CourseStatuses
 	{
 		Created,
 		OpenForAssignig,
