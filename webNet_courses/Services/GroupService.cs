@@ -38,7 +38,8 @@ namespace webNet_courses.Services
 				MaximumStidetsCount = newCoures.MaximumStidetsCount,
 				Requirements = newCoures.Requirements,
 				Annotations = newCoures.Annotations,
-				Semester = newCoures.Semester
+				Semester = newCoures.Semester,
+				CreatedTime = DateTime.Now,
 			};
 
 			group.Courses.Add(newCourse);

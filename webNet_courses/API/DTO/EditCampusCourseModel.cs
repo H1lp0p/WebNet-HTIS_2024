@@ -1,19 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using webNet_courses.Domain.Enumerations;
 
-namespace webNet_courses.Domain.Entities
+namespace webNet_courses.API.DTO
 {
-	public class CampusCourse
+	public class EditCampusCourseModel
 	{
-		public Guid Id { get; set; }
-
-		public Guid CampusGroupId { get; set; }
-
 		[Required]
+		[MinLength(1)]
 		public string Name { get; set; }
-
-		[Required]
-		public DateTime CreatedTime { get; set; }
 
 		[Required]
 		[Range(2000, 2029, ErrorMessage = "Year must be in range [2000, 2029]")] //TODO: test maxValue
@@ -33,14 +27,5 @@ namespace webNet_courses.Domain.Entities
 
 		[Required]
 		public Semester Semester { get; set; }
-
-		[Required]
-		public CourseStatuses Status { get; set; } = CourseStatuses.Created;
-
-		public ICollection<CampusCourseTeacher> Teachers { get; set; } = new List<CampusCourseTeacher>();
-
-		public ICollection<CampusCourseStudent> Students { get; set; } = new List<CampusCourseStudent>();
-
-		public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 	}
 }

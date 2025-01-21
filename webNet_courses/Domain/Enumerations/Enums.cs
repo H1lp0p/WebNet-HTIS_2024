@@ -20,6 +20,18 @@
 		Spring
 	}
 
+	public enum MarkType
+	{
+		Midterm,
+		Final
+	}
+
+	public enum CourseSorting
+	{
+		CreatedAsc,
+		CreatedDesc
+	}
+
 	public enum CourseStatuses
 	{
 		Created,

@@ -12,7 +12,6 @@ namespace webNet_courses.Persistence
 	{
 		public CourseContext(DbContextOptions<CourseContext> options) : base(options) { }
 
-		public DbSet<User> User {  get; set; }
 		public DbSet<CampusCourse> Courses { get; set; }
 		public DbSet<CampusGroup> Groups { get; set; }
 		public DbSet<CampusCourseStudent> Students { get; set; }

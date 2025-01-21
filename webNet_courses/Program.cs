@@ -11,6 +11,8 @@ using webNet_courses.Domain.Entities;
 using webNet_courses.Persistence;
 
 using webNet_courses.API.Middlewear;
+using webNet_courses.Abstruct;
+using webNet_courses.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,6 +97,11 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddExceptionHandler<ExeptionsHandler>();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IUserService, UserSevice>();
+builder.Services.AddScoped<ICoursesServise, CourseService>();
+builder.Services.AddScoped<IReportsService, ReportsService>();
 
 var app = builder.Build();
 

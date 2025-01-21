@@ -8,6 +8,8 @@ namespace webNet_courses.Domain.Entities
 		public string Text { get; set; }
 
 		[Required]
-		public bool isImportant { get; set; } = false;
+		public bool IsImportant { get; set; } = false;
+
+		public Guid CampusCourseId { get; set; }
 	}
 }

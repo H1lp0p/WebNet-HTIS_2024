@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -6,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using webNet_courses.Abstruct;
 using webNet_courses.API.DTO;
+using webNet_courses.API.Mappers;
 using webNet_courses.Domain.Entities;
 using webNet_courses.Persistence;
 
@@ -31,12 +33,6 @@ namespace webNet_courses.Services
 			_userManager = userManager;
 			_signInManager = signInManager;
 		}
-
-		public Task<bool> addAdmin(User user)
-		{
-			throw new NotImplementedException();
-		}
-
 
 		public async Task<bool> edit(Guid userId, string newFullName, DateTime newBirthDate)
 		{
@@ -71,6 +67,24 @@ namespace webNet_courses.Services
 			};
 			var token = tokenHandler.CreateToken(tokenDescriptor);
 			return tokenHandler.WriteToken(token);
+		}
+
+		public async Task<ICollection<UserShortDto>> GetUserList()
+		{
+			var result = new List<UserShortDto>();
+			await _userManager.Users.ForEachAsync(el => result.Add(el.toShortDto()));
+			return result;
+		}
+
+		public async Task<UserRolesDto> getRoles(Guid id)
+		{
+			User? user = await _userManager.FindByIdAsync(id.ToString());
+			if (user == null)
+			{
+				throw new Exception("Not found");
+			}
+			var result = user.toRolesDto(await _userManager.IsInRoleAsync(user, "Admin"));
+			return result; 
 		}
 	}
 }

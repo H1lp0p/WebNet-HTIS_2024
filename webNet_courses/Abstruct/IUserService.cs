@@ -1,4 +1,5 @@
 ﻿using webNet_courses.Domain.Entities;
+using webNet_courses.API.DTO;
 
 namespace webNet_courses.Abstruct
 {
@@ -10,8 +11,12 @@ namespace webNet_courses.Abstruct
 			DateTime newBirthDate
 			);
 
-		public Task<bool> addAdmin(User user);
-
 		public string GenerateToken(User user);
+
+		public Task<ICollection<UserShortDto>> GetUserList();
+
+		public Task<UserRolesDto> getRoles(Guid id);
+
+
 	}
 }
