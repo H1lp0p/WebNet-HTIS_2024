@@ -22,7 +22,8 @@ builder.Services.AddDbContext<CourseContext>(options =>
 	options.UseLazyLoadingProxies();
 });
 
-builder.Services.AddIdentity<User, IdentityRole<Guid>>().AddEntityFrameworkStores<CourseContext>();
+builder.Services.AddIdentity<User, IdentityRole<Guid>>()
+	.AddEntityFrameworkStores<CourseContext>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -68,7 +69,7 @@ builder.Services.AddSwaggerGen(options =>
 	options.SwaggerDoc("v1", new OpenApiInfo
 	{
 		Version = "v1",
-		Title = "Forum"
+		Title = "Courses"
 	});
 	options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
 	{
@@ -98,12 +99,18 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddExceptionHandler<ExeptionsHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IUserService, UserSevice>();
 builder.Services.AddScoped<ICoursesServise, CourseService>();
 builder.Services.AddScoped<IReportsService, ReportsService>();
 
 var app = builder.Build();
+
+using var serviceScope = app.Services.CreateScope();
+var context = serviceScope.ServiceProvider.GetService<CourseContext>();
+context?.Database.Migrate();
 
 if (app.Environment.IsDevelopment())
 {

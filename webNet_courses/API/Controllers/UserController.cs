@@ -8,7 +8,8 @@ using webNet_courses.Persistence;
 
 namespace webNet_courses.API.Controllers
 {
-	[Route("api/user")]
+	
+	[Route("")]
 	[ApiController]
 	[Authorize(AuthenticationSchemes = "Bearer")]
 	[ProducesResponseType(typeof(Response), 500)]
@@ -18,13 +19,13 @@ namespace webNet_courses.API.Controllers
 		private readonly SignInManager<User> _signInManager;
 		private readonly IUserService _userService;
 
-		private readonly RoleManager<IdentityRole> _roleManager;
+		private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
 		public UserController(
 			UserManager<User> userManager,
 			SignInManager<User> signInManager,
 			IUserService userService,
-			RoleManager<IdentityRole> roleManager
+			RoleManager<IdentityRole<Guid>> roleManager
 			)
 		{
 			_userManager = userManager;
@@ -33,8 +34,9 @@ namespace webNet_courses.API.Controllers
 			_roleManager = roleManager;
 		}
 
+		///<summary>Get list of all users</summary>
 		[HttpGet]
-		[Route("users")]
+		[Route("/users")]
 		public async Task<ActionResult<ICollection<UserShortDto>>> GetUsers()
 		{
 			try
@@ -48,7 +50,7 @@ namespace webNet_courses.API.Controllers
 		}
 
 		[HttpGet]
-		[Route("roles")]
+		[Route("/roles")]
 		public async Task<ActionResult<UserRolesDto>> GetRoles()
 		{
 			User? user = await _userManager.GetUserAsync(User);

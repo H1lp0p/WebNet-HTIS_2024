@@ -97,13 +97,50 @@ namespace webNet_courses.API.Mappers
 			};
 		}
 
-		public static CampusCourseDetailsModel getDetails(this CampusCourse course)
+		public static CampusCourseDetailsModel getDetails(
+			this CampusCourse course,
+			courseDetailsPermission permission, 
+			Guid? nowStudentId = null)
 		{
 			var teachersDtoList = new List<CampusCourseTeacherDto>();
 			course.Teachers.ToList().ForEach(t => teachersDtoList.Add(t.toDto()));
 
 			var studentsDtoList = new List<CampusCourseStudentDto>();
 			course.Students.ToList().ForEach(s => studentsDtoList.Add(s.toDto()));
+
+			switch (permission)
+			{
+				case courseDetailsPermission.standart:
+					foreach (var student in studentsDtoList)
+					{
+						student.FinalResult = StudentMarks.NotDefined;
+						student.MidTermResult = StudentMarks.NotDefined;
+					}
+					studentsDtoList = studentsDtoList
+						.Where(s => s.StudentStatus == StudentStatuses.Accepted)
+						.ToList();
+					break;
+				case courseDetailsPermission.courseStudent:
+					if (nowStudentId == null)
+					{
+						throw new Exception("Id of current student is null");
+					}
+					foreach (var student in studentsDtoList)
+					{
+						if (student.Id != nowStudentId)
+						{
+							student.FinalResult = StudentMarks.NotDefined;
+							student.MidTermResult = StudentMarks.NotDefined;
+						}
+					}
+					studentsDtoList = studentsDtoList
+						.Where(s => s.StudentStatus == StudentStatuses.Accepted)
+						.ToList();
+					break;
+				default:
+
+					break;
+			}
 
 			var notificationsDtoList = new List<NotificationDto>();
 			course.Notifications.ToList().ForEach(n => notificationsDtoList.Add(n.toDto()));

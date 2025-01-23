@@ -37,10 +37,10 @@ namespace webNet_courses.Domain.Entities
 		[Required]
 		public CourseStatuses Status { get; set; } = CourseStatuses.Created;
 
-		public ICollection<CampusCourseTeacher> Teachers { get; set; } = new List<CampusCourseTeacher>();
+		public virtual ICollection<CampusCourseTeacher> Teachers { get; set; } = new List<CampusCourseTeacher>();
 
-		public ICollection<CampusCourseStudent> Students { get; set; } = new List<CampusCourseStudent>();
+		public virtual ICollection<CampusCourseStudent> Students { get; set; } = new List<CampusCourseStudent>();
 
-		public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+		public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 	}
 }

@@ -7,7 +7,7 @@ using webNet_courses.Domain.Entities;
 
 namespace webNet_courses.API.Controllers
 {
-	[Route("api/groups")]
+	[Route("/groups")]
 	[ApiController]
 	[Authorize(AuthenticationSchemes = "Bearer")]
 	[ProducesResponseType(typeof(Response), 500)]
@@ -53,7 +53,7 @@ namespace webNet_courses.API.Controllers
 		[HttpPut]
 		[Authorize(Roles = "Admin")]
 		[Route("{id}")]
-		public async Task<ActionResult<CampusGroupModel>> Edit([FromQuery] Guid id, CUGroupModel edit)
+		public async Task<ActionResult<CampusGroupModel>> Edit([FromRoute] Guid id, CUGroupModel edit)
 		{
 			try
 			{
@@ -68,7 +68,7 @@ namespace webNet_courses.API.Controllers
 		[HttpDelete]
 		[Authorize(Roles = "Admin")]
 		[Route("{id}")]
-		public async Task<IActionResult> Delete([FromQuery] Guid id)
+		public async Task<IActionResult> Delete([FromRoute] Guid id)
 		{
 			try
 			{
@@ -82,7 +82,7 @@ namespace webNet_courses.API.Controllers
 
 		[HttpGet]
 		[Route("{id}")]
-		public async Task<ActionResult<List<CoursePreviewModel>>> GetCourseList([FromQuery] Guid id)
+		public async Task<ActionResult<List<CoursePreviewModel>>> GetCourseList([FromRoute] Guid id)
 		{
 			try
 			{
@@ -97,16 +97,18 @@ namespace webNet_courses.API.Controllers
 		[HttpPost]
 		[Route("{groupId}")]
 		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ICollection<CoursePreviewModel>>> CreateCourse([FromQuery] Guid groupId, CreateCourseModel newCourse)
+		public async Task<ActionResult<ICollection<CoursePreviewModel>>> CreateCourse([FromRoute] Guid groupId, CreateCourseModel newCourse)
 		{
-			try
+			return Ok(await _groupService.addCourse(groupId, newCourse));
+
+			/*try
 			{
-				return Ok(await _groupService.addCourse(groupId, newCourse));
+				
 			}
 			catch (Exception ex)
 			{
 				return BadRequest(ex.Message);
-			}
+			}*/
 		}
 	}
 }

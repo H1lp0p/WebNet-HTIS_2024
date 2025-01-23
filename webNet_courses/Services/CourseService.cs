@@ -46,10 +46,7 @@ namespace webNet_courses.Services
 				IsImportant = newNotification.IsImportant
 			};
 
-			course.Notifications.Add( newNot );
-			await _context.SaveChangesAsync();
-
-			return course.getDetails();
+			return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
 
 		}
 
@@ -76,9 +73,16 @@ namespace webNet_courses.Services
 
 			bool isStudent = course.Students.Any(s => s.User.Id == teacher.Id);
 
+			bool isAlreadyTeacher = course.Teachers.Any(t => t.User.Id == teacher.Id);
+
 			if (isStudent) 
 			{
 				throw new Exception("User is student");
+			}
+
+			if (isAlreadyTeacher)
+			{
+				throw new Exception("User is already teacher");
 			}
 
 			CampusCourseTeacher newRelationship = new CampusCourseTeacher
@@ -92,7 +96,7 @@ namespace webNet_courses.Services
 			teacher.TeachingCourses.Add(newRelationship);
 			await _context.SaveChangesAsync();
 
-			return course.getDetails();
+			return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
 		}
 
 		public async Task<ICollection<CoursePreviewModel>> deleteCourse(Guid id)
@@ -128,7 +132,7 @@ namespace webNet_courses.Services
 
 			await _context.SaveChangesAsync();
 
-			return course.getDetails();
+			return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
 			
 		}
 
@@ -151,7 +155,7 @@ namespace webNet_courses.Services
 
 			await _context.SaveChangesAsync();
 
-			return course.getDetails();
+			return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
 		}
 
 		public async Task<CampusCourseDetailsModel> editStudentMark(Guid courseId, Guid studentId, EditCourseStudentMarkModel mark,User currentUser, bool isAdmin)
@@ -191,7 +195,7 @@ namespace webNet_courses.Services
 
 			await _context.SaveChangesAsync();
 
-			return course.getDetails();
+			return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
 		}
 
 		public async Task<CampusCourseDetailsModel> editStudentStatus(Guid studentId, Guid courseId, EditCourseStudentStatusModel newStatus, User currentUser, bool isAdmin)
@@ -226,7 +230,7 @@ namespace webNet_courses.Services
 				}
 				else if (relationship.StudentStatus == StudentStatuses.Accepted)
 				{
-					return course.getDetails();
+					return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
 				}
 
 				if (remaining == 0)
@@ -245,7 +249,7 @@ namespace webNet_courses.Services
 			relationship.StudentStatus = newStatus.Status;
 			await _context.SaveChangesAsync();
 
-			return course.getDetails();
+			return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
 
 		}
 
@@ -256,9 +260,9 @@ namespace webNet_courses.Services
 			List<CampusCourse> list = [];
 
 			list = await _context.Courses
-				.Where(c => search == null || c.Name.Contains(search))
+				.Where(c => search == null || c.Name.IndexOf(search) == 0)
 				.Where(c =>
-					hasPlaceAndOpen == null ||
+					hasPlaceAndOpen != true ||
 					(c.Status == CourseStatuses.OpenForAssignig && (c.Students.Where(
 							el => el.StudentStatus == StudentStatuses.Accepted).Count() < c.MaximumStidetsCount)))
 				.Where(c => semester == null || c.Semester == semester).ToListAsync();
@@ -267,24 +271,22 @@ namespace webNet_courses.Services
 			{
 				if (sorting == CourseSorting.CreatedAsc)
 				{
-					list = list.OrderBy(c => c.CreatedTime).Skip((page - 1) * pageSize).Take(page).ToList();
+					list = list.OrderBy(c => c.CreatedTime).ToList();
 				}
 				else
 				{
-					list = list.OrderByDescending(c => c.CreatedTime).Skip((page - 1) * pageSize).Take(page).ToList();
+					list = list.OrderByDescending(c => c.CreatedTime).ToList();
 				}
 			}
-			else
-			{
-				list = list.Skip((page - 1) * pageSize).Take(page).ToList();
-			}
+
+			list = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
 			list.ForEach(el => result.Add(el.toPreview()));
 
 			return result;
 		}
 
-		public async Task<CampusCourseDetailsModel> getDetails(Guid id)
+		public async Task<CampusCourseDetailsModel> getDetails(Guid id, Guid curUserId)
 		{
 			CampusCourse? course = await _context.Courses.FindAsync(id);
 
@@ -293,7 +295,22 @@ namespace webNet_courses.Services
 				throw new Exception("Not found");
 			}
 
-			return course.getDetails();
+			User nowUser = (await _userManager.FindByIdAsync(curUserId.ToString()))!;
+
+			var isAdmin = await _userManager.IsInRoleAsync(nowUser, "Admin");
+			
+			var isTeacher = course.Teachers
+				.Any(t => t.User.Id == curUserId);
+
+			var isStudent = course.Students
+				.Any(s => s.User.Id == curUserId && s.StudentStatus == StudentStatuses.Accepted);
+
+			courseDetailsPermission permission = (
+				isAdmin || isTeacher ? courseDetailsPermission.TeacherOrAdmin :
+				(isStudent ? courseDetailsPermission.courseStudent :
+						courseDetailsPermission.standart));
+
+			return course.getDetails(permission, curUserId);
 		}
 
 		public async Task<ICollection<CoursePreviewModel>> myCourses(User user)
@@ -326,7 +343,7 @@ namespace webNet_courses.Services
 			course.Status = newStatus.Status;
 			await _context.SaveChangesAsync();
 
-			return course.getDetails();
+			return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
 		}
 
 		public async Task<bool> signUp(Guid courseId, User user)
@@ -338,11 +355,30 @@ namespace webNet_courses.Services
 				throw new Exception("Not found");
 			}
 
+			if (course.Status != CourseStatuses.OpenForAssignig)
+			{
+				throw new Exception("You can't sign up to the course that is not open for assigning");
+			}
+
 			bool isTeacher = course.Teachers.Any(t => t.User.Id == user.Id);
+			bool isAlreadyStudent = course.Students.Any(s => s.User.Id == user.Id);
+
+			int studentsCount = course.Students
+				.Where(s => s.StudentStatus == StudentStatuses.Accepted).Count();
+
+			if (studentsCount >= course.MaximumStidetsCount)
+			{
+				throw new Exception("Course is fullfilled with students");
+			}
 
 			if (isTeacher)
 			{
 				throw new Exception("User is teacher");
+			}
+
+			if (isAlreadyStudent)
+			{
+				throw new Exception("User is already student");
 			}
 
 			CampusCourseStudent newRelationship = new CampusCourseStudent

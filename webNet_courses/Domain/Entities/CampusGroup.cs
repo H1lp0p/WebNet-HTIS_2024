@@ -9,6 +9,6 @@ namespace webNet_courses.Domain.Entities
 		[Required]
 		public string Name {  get; set; }
 
-		public ICollection<CampusCourse> Courses { get; set; } = new List<CampusCourse>();
+		public virtual ICollection<CampusCourse> Courses { get; set; } = new List<CampusCourse>();
 	}
 }

@@ -11,12 +11,8 @@ namespace webNet_courses.Domain.Entities
 		[Required]
 		public DateTime BirthDate {  get; set; }
 
-		[Required]
-		[EmailAddress]
-		public string Email { get; set; }
+		public virtual ICollection<CampusCourseTeacher> TeachingCourses { get; set; } = new List<CampusCourseTeacher>();
 
-		public ICollection<CampusCourseTeacher> TeachingCourses { get; set; } = new List<CampusCourseTeacher>();
-
-		public ICollection<CampusCourseStudent> LearningCourses { get; set; } = new List<CampusCourseStudent>();
+		public virtual ICollection<CampusCourseStudent> LearningCourses { get; set; } = new List<CampusCourseStudent>();
 	}
 }

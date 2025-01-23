@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using webNet_courses.Abstruct;
 using webNet_courses.API.DTO;
@@ -11,7 +13,7 @@ using webNet_courses.Persistence;
 
 namespace webNet_courses.API.Controllers
 {
-	[Route("api/account")]
+	[Route("")]
 	[ApiController]
 	[Authorize(AuthenticationSchemes = "Bearer")]
 	[ProducesResponseType(typeof(Response), 500)]
@@ -20,25 +22,28 @@ namespace webNet_courses.API.Controllers
 		private readonly UserManager<User> _userManager;
 		private readonly SignInManager<User> _signInManager;
 		private readonly IUserService _userService;
+		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		private readonly RoleManager<IdentityRole> _roleManager;
+		private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
 		public AccountController(
 			UserManager<User> userManager,
 			SignInManager<User> signInManager,
 			IUserService userService,
-			RoleManager<IdentityRole> roleManager
+			RoleManager<IdentityRole<Guid>> roleManager,
+			IHttpContextAccessor httpContextAccessor
 			)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_userService = userService;
 			_roleManager = roleManager;
+			_httpContextAccessor = httpContextAccessor;
 		}
 
 		[HttpPost]
 		[AllowAnonymous]
-		[Route("/register")]
+		[Route("/registration")]
 		public async Task<ActionResult<TokenDto>> Register(UserRegisterModel register)
 		{
 			if (ModelState.IsValid)
@@ -50,6 +55,7 @@ namespace webNet_courses.API.Controllers
 
 				User newUser = new User
 				{
+					UserName = register.FullName,
 					FullName = register.FullName,
 					Email = register.Email,
 					BirthDate = register.BirthDate
@@ -60,16 +66,15 @@ namespace webNet_courses.API.Controllers
 				{
 					throw new Exception(result.ToString());
 				}
-
 				var nowUser = await _userManager.FindByEmailAsync(register.Email);
-				var loginResult = await _signInManager.PasswordSignInAsync(nowUser!, register.Password, true, false);
+				var loginResult = await _signInManager.PasswordSignInAsync(nowUser, register.Password, true, false);
 
 				if (!loginResult.Succeeded)
 				{
 					throw new Exception(loginResult.ToString());
 				}
 
-				var jwt = _userService.GenerateToken(nowUser!);
+				var jwt = await _userService.GenerateToken(newUser);
 				return Ok(new TokenDto { token = jwt });
 			}
 			return BadRequest(ModelState);
@@ -94,28 +99,20 @@ namespace webNet_courses.API.Controllers
 					throw new Exception(loginResult.ToString());
 				}
 
-				var jwt = _userService.GenerateToken(user);
+				var jwt = await _userService.GenerateToken(user);
 
 				return Ok(new TokenDto { token = jwt});
 			}
 			return BadRequest(ModelState);
 		}
 
+		//TODO: 
 		[HttpPost]
 		[Route("logout")]
 		public async Task<IActionResult> Logout()
 		{
-			User? user = await _userManager.GetUserAsync(User);
-
-			if (User == null)
-			{
-				return Unauthorized();
-			}
-			else
-			{
-				await _signInManager.SignOutAsync();
-				return Ok();
-			}
+			await _signInManager.SignOutAsync();
+			return Ok();
 		}
 
 		[HttpPut]
@@ -153,7 +150,7 @@ namespace webNet_courses.API.Controllers
 
 			if (!await _roleManager.RoleExistsAsync("Admin"))
 			{
-				await _roleManager.CreateAsync(new IdentityRole("Admin"));
+				await _roleManager.CreateAsync(new IdentityRole<Guid>("Admin"));
 			}
 
 			var result = await _userManager.AddToRoleAsync(user, "Admin");

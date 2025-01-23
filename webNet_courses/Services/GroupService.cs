@@ -5,16 +5,22 @@ using webNet_courses.API.Mappers;
 using webNet_courses.Persistence;
 using webNet_courses.Domain.Entities;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Identity;
 
 namespace webNet_courses.Services
 {
 	public class GroupService : IGroupService
 	{
 		private readonly CourseContext _context;
+		private readonly UserManager<User> _userManager;
 
-		public GroupService(CourseContext courseContext)
+		public GroupService(
+			CourseContext courseContext,
+			UserManager<User> userManager
+			)
 		{
 			_context = courseContext;
+			_userManager = userManager;
 		}
 
 		public async Task<ICollection<CoursePreviewModel>> addCourse(Guid id, CreateCourseModel newCoures)
@@ -39,10 +45,27 @@ namespace webNet_courses.Services
 				Requirements = newCoures.Requirements,
 				Annotations = newCoures.Annotations,
 				Semester = newCoures.Semester,
-				CreatedTime = DateTime.Now,
+				CreatedTime = DateTime.UtcNow,
 			};
 
+			var mainTeacher = await _userManager.FindByIdAsync(newCoures.MainTeacherId.ToString());
+
+			if (mainTeacher == null) 
+			{
+				throw new Exception("Teacher not found");
+			}
+
+			var relationship = new CampusCourseTeacher
+			{
+				User = mainTeacher,
+				Course = newCourse,
+				isMain = true
+			};
+
+			newCourse.Teachers.Add(relationship);
+			mainTeacher.TeachingCourses.Add(relationship);
 			group.Courses.Add(newCourse);
+
 			await _context.SaveChangesAsync();
 
 			var result = new List<CoursePreviewModel>();
@@ -65,14 +88,14 @@ namespace webNet_courses.Services
 
 			var result = new List<CoursePreviewModel>();
 
-			courses.ForEach(el => el.toPreview());
+			courses.ForEach(el => result.Add(el.toPreview()));
 
 			return result;
         }
 
 		public async Task<CampusGroupModel> create(CUGroupModel model)
 		{
-			if (await _context.Groups.FirstOrDefaultAsync(el => el.Name == model.Name) == null)
+			if (await _context.Groups.FirstOrDefaultAsync(el => el.Name == model.Name) != null)
 			{
 				throw new Exception("Group with this name already exists");
 			}

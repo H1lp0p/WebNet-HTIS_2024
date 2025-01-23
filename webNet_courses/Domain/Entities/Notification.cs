@@ -4,6 +4,8 @@ namespace webNet_courses.Domain.Entities
 {
 	public class Notification
 	{
+		public Guid Id { get; set; }
+
 		[Required]
 		public string Text { get; set; }
 

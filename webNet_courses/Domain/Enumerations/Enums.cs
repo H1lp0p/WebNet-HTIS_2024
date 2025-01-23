@@ -39,4 +39,11 @@
 		Started,
 		Finished
 	}
+
+	public enum courseDetailsPermission
+	{
+		standart,
+		courseStudent,
+		TeacherOrAdmin
+	}
 }

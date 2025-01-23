@@ -50,16 +50,27 @@ namespace webNet_courses.Services
 			return editResult.Succeeded;
 		}
 
-		public string GenerateToken(User user)
+		public async Task<string> GenerateToken(User user)
 		{
 			var tokenHandler = new JwtSecurityTokenHandler();
+
 			var key = Encoding.UTF8.GetBytes(_config["JWT:key"]!);
+
+			List<Claim> claimsList = [];
+
+			var roles = await _userManager.GetRolesAsync(user);
+
+			claimsList.Add(new Claim(ClaimTypes.Email, user.Email!));
+			claimsList.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+
+			foreach (var role in roles)
+			{
+				claimsList.Add(new Claim(ClaimTypes.Role, role));
+			}
+
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{
-				Subject = new ClaimsIdentity([
-				new Claim(ClaimTypes.Email, user.Email),
-					new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-				]),
+				Subject = new ClaimsIdentity(claimsList),
 				Issuer = _config["JWT:issuer"],
 				Audience = _config["JWT:audience"],
 				Expires = DateTime.UtcNow.AddHours(Int32.Parse(_config["JWT:expireTime"]!)),

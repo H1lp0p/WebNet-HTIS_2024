@@ -10,7 +10,7 @@ namespace webNet_courses.Abstruct
 
 		public Task<CampusCourseDetailsModel> editCourse(Guid courseId, EditCampusCourseModel editData);
 
-		public Task<CampusCourseDetailsModel> getDetails(Guid id);
+		public Task<CampusCourseDetailsModel> getDetails(Guid id, Guid curUserId);
 
 		public Task<bool> signUp (Guid courseId, User user);
 

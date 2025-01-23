@@ -11,7 +11,7 @@ namespace webNet_courses.Abstruct
 			DateTime newBirthDate
 			);
 
-		public string GenerateToken(User user);
+		public Task<string> GenerateToken(User user);
 
 		public Task<ICollection<UserShortDto>> GetUserList();
 
