@@ -223,6 +223,20 @@ namespace webNet_courses.Services
 			int remaining = course.MaximumStidetsCount -
 				course.Students.ToList().FindAll(s => s.StudentStatus == StudentStatuses.Accepted).Count;
 
+
+
+			if (newStatus.Status == StudentStatuses.InQueue)
+			{
+				if (relationship.StudentStatus == StudentStatuses.InQueue)
+				{
+					return course.getDetails(courseDetailsPermission.TeacherOrAdmin);
+				}
+				else
+				{
+					throw new BLException("You can't set student's status to InQueue");
+				}
+			}
+
 			if (newStatus.Status == StudentStatuses.Accepted)
 			{
 				if (relationship.StudentStatus == StudentStatuses.Declined)
