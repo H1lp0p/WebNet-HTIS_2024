@@ -167,8 +167,8 @@ namespace webNet_courses.API.Mappers
 			{
 				Id = count.Id,
 				Name = count.Name,
-				AveragePassed = count.AllStudentsCount != 0 ? (count.Passed / count.AllStudentsCount) : 0.0,
-				AverageFailed = count.AllStudentsCount != 0 ? (count.Failed / count.AllStudentsCount) : 0.0
+				AveragePassed = count.AllStudentsCount != 0 ? ((double)count.Passed / count.AllStudentsCount) : 0.0,
+				AverageFailed = count.AllStudentsCount != 0 ? ((double)count.Failed / count.AllStudentsCount) : 0.0
 			};
 		}
 

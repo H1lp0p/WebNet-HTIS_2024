@@ -132,7 +132,7 @@ namespace webNet_courses.API.Controllers
 			if (ModelState.IsValid)
 			{
 				User user = (await _userManager.GetUserAsync(User))!;
-				bool editRes = await _userService.edit(user.Id, edit.FullName, edit.BirthDate);
+				await _userService.edit(user.Id, edit.FullName, edit.BirthDate);
 				user = (await _userManager.GetUserAsync(User))!;
 				return Ok(user.Profile());
 			}
