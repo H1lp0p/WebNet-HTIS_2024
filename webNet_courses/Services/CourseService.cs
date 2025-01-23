@@ -108,6 +108,27 @@ namespace webNet_courses.Services
 			{
 				throw new FileNotFoundException("Course not found");
 			}
+
+			foreach (var teacher in course.Teachers)
+			{
+				teacher.User.TeachingCourses.Remove(teacher);
+			}
+
+			course.Teachers.Clear();
+
+			foreach (var student in course.Students)
+			{
+				student.User.LearningCourses.Remove(student);
+			}
+
+			course.Students.Clear();
+
+			foreach (var notif in course.Notifications)
+			{
+				_context.Notifications.Remove(notif);
+			}
+			course.Notifications.Clear();
+
 			var delResult = _context.Courses.Remove(course);
 
 			await _context.SaveChangesAsync();
