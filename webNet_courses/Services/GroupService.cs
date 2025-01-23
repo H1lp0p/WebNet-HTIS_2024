@@ -6,6 +6,7 @@ using webNet_courses.Persistence;
 using webNet_courses.Domain.Entities;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
+using webNet_courses.Domain.Excpetions;
 
 namespace webNet_courses.Services
 {
@@ -29,12 +30,12 @@ namespace webNet_courses.Services
 
             if (group == null)
             {
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Group not found");
             }
 
 			if (group.Courses.FirstOrDefault(course => course.Name == newCoures.Name) != null)
 			{
-				throw new Exception("Course with this name already exists in this group");
+				throw new BLException("Course with this name already exists in this group");
 			}
 
 			CampusCourse newCourse = new CampusCourse
@@ -81,7 +82,7 @@ namespace webNet_courses.Services
 
             if (group == null)
             {
-				throw new Exception("Not Found");
+				throw new FileNotFoundException("Group not found");
             }
 
 			var courses = group.Courses.ToList();
@@ -97,7 +98,7 @@ namespace webNet_courses.Services
 		{
 			if (await _context.Groups.FirstOrDefaultAsync(el => el.Name == model.Name) != null)
 			{
-				throw new Exception("Group with this name already exists");
+				throw new BLException("Group with this name already exists");
 			}
 
 			CampusGroup newGroup = new CampusGroup {  Name = model.Name };
@@ -113,8 +114,14 @@ namespace webNet_courses.Services
 			CampusGroup? group = await _context.Groups.FindAsync(id);
             if (group == null)
             {
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Group not found");
             }
+
+			if (await _context.Groups.FirstOrDefaultAsync(el => el.Name == model.Name) != null)
+			{
+				throw new BLException("Group with this name already exists");
+			}
+
 			group.Name = model.Name;
 			await _context.SaveChangesAsync();
 
@@ -130,7 +137,7 @@ namespace webNet_courses.Services
 				await _context.SaveChangesAsync();
 				return true;
 			}
-			throw new Exception("Not found");
+			throw new FileNotFoundException("Group not found");
 		}
 
 		public async Task<ICollection<CampusGroupModel>> groupList()

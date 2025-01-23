@@ -41,7 +41,7 @@ namespace webNet_courses.Services
 					var teacherToUpdate = result.FirstOrDefault(r => r.Id == mainTeacher.User.Id);
 					if (teacherToUpdate != null)
 					{
-						var groupToUpdate = teacherToUpdate.CampusGroupReports.First(g => g.Id == group.Id);
+						var groupToUpdate = teacherToUpdate.CampusGroupReports.FirstOrDefault(g => g.Id == group.Id);
 						if (groupToUpdate != null) 
 						{
 							groupToUpdate.Failed += failed;

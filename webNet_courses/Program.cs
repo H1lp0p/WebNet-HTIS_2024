@@ -121,6 +121,8 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 app.UseHttpsRedirection();
 
+app.UseExceptionHandler();
+
 app.UseAuthorization();
 
 app.MapControllers();

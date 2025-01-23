@@ -35,30 +35,23 @@ namespace webNet_courses.API.Controllers
 		}
 
 		///<summary>Get list of all users</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
 		[HttpGet]
 		[Route("/users")]
 		public async Task<ActionResult<ICollection<UserShortDto>>> GetUsers()
 		{
-			try
-			{
-				return Ok(await _userService.GetUserList());
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			return Ok(await _userService.GetUserList());
 		}
 
+		///<summary>Get user's roles</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
 		[HttpGet]
 		[Route("/roles")]
 		public async Task<ActionResult<UserRolesDto>> GetRoles()
 		{
-			User? user = await _userManager.GetUserAsync(User);
-
-			if (user == null)
-			{
-				return Unauthorized();
-			}
+			User user = (await _userManager.GetUserAsync(User))!;
 
 			return Ok(await _userService.getRoles(user.Id));
 		}

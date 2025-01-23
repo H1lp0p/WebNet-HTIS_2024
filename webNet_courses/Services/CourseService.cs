@@ -6,6 +6,7 @@ using webNet_courses.API.DTO;
 using webNet_courses.API.Mappers;
 using webNet_courses.Domain.Entities;
 using webNet_courses.Domain.Enumerations;
+using webNet_courses.Domain.Excpetions;
 using webNet_courses.Persistence;
 
 namespace webNet_courses.Services
@@ -32,12 +33,12 @@ namespace webNet_courses.Services
 			CampusCourse? course = await _context.Courses.FindAsync( courseId );
 			if ( course == null )
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			if (!isAdmin && !course.Teachers.Any(r => r.User.Id == currentUser.Id))
 			{
-				throw new Exception("You can't add notifications to this course");
+				throw new BLException("You can't add notifications to this course");
 			}
 
 			Notification newNot = new Notification
@@ -58,17 +59,17 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Course not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			if (teacher == null)
 			{
-				throw new Exception("User not found");
+				throw new FileNotFoundException("User not found");
 			}
 
 			if (!isAdmin && !course.Teachers.Any(r => r.User.Id == currentUser.Id && r.isMain))
 			{
-				throw new Exception("You can't add teachers");
+				throw new BLException("You can't add teachers");
 			}
 
 			bool isStudent = course.Students.Any(s => s.User.Id == teacher.Id);
@@ -77,12 +78,12 @@ namespace webNet_courses.Services
 
 			if (isStudent) 
 			{
-				throw new Exception("User is student");
+				throw new BLException("User is student");
 			}
 
 			if (isAlreadyTeacher)
 			{
-				throw new Exception("User is already teacher");
+				throw new BLException("User is already teacher");
 			}
 
 			CampusCourseTeacher newRelationship = new CampusCourseTeacher
@@ -105,7 +106,7 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 			var delResult = _context.Courses.Remove(course);
 
@@ -120,7 +121,7 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			course.Name = editData.Name;
@@ -142,12 +143,12 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			if (!isAdmin && !course.Teachers.Any(r => r.User.Id == currentUser.Id))
 			{
-				throw new Exception("You can't edit requirements and annotations of this course");
+				throw new BLException("You can't edit requirements and annotations of this course");
 			}
 
 			course.Requirements = edit.Requirements;
@@ -164,24 +165,24 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			if (!isAdmin && !course.Teachers.Any(r => r.User.Id == currentUser.Id))
 			{
-				throw new Exception("You can't edit student's marks in this course");
+				throw new BLException("You can't edit student's marks in this course");
 			}
 
 			CampusCourseStudent? relationship = course.Students.FirstOrDefault(r => r.User.Id == studentId);
 
 			if (relationship == null)
 			{
-				throw new Exception("Can't find student in course");
+				throw new BLException("Can't find student in course");
 			}
 
 			if (relationship.StudentStatus == StudentStatuses.InQueue)
 			{
-				throw new Exception("Student currently in queue");
+				throw new BLException("Student currently in queue");
 			}
 
 			if (mark.MarkType == MarkType.Midterm)
@@ -204,19 +205,19 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			if (!isAdmin && !course.Teachers.Any(r => r.User.Id == currentUser.Id))
 			{
-				throw new Exception("You can't edit student's statuses in this course");
+				throw new BLException("You can't edit student's statuses in this course");
 			}
 
 			CampusCourseStudent? relationship = course.Students.FirstOrDefault(r => r.User.Id == studentId);
 
 			if (relationship == null)
 			{
-				throw new Exception("Can't find student in course");
+				throw new FileNotFoundException("Can't find student in course");
 			}
 
 			int remaining = course.MaximumStidetsCount -
@@ -226,7 +227,7 @@ namespace webNet_courses.Services
 			{
 				if (relationship.StudentStatus == StudentStatuses.Declined)
 				{
-					throw new Exception("Student prewiously was declined");
+					throw new BLException("Student prewiously was declined");
 				}
 				else if (relationship.StudentStatus == StudentStatuses.Accepted)
 				{
@@ -235,14 +236,14 @@ namespace webNet_courses.Services
 
 				if (remaining == 0)
 				{
-					throw new Exception("Course is fullfilled with students");
+					throw new BLException("Course is fullfilled with students");
 				}
 			}
 			else if (newStatus.Status == StudentStatuses.Declined)
 			{
 				if (relationship.StudentStatus == StudentStatuses.Accepted)
 				{
-					throw new Exception("Student prewiously was accepted");
+					throw new BLException("Student prewiously was accepted");
 				}
 			}
 
@@ -292,7 +293,7 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			User nowUser = (await _userManager.FindByIdAsync(curUserId.ToString()))!;
@@ -327,17 +328,17 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			if (!isAdmin && !course.Teachers.Any(r => r.User.Id == currentUser.Id))
 			{
-				throw new Exception("You can't edit course status");
+				throw new BLException("You can't edit course status");
 			}
 
 			if (course.Status > newStatus.Status)
 			{
-				throw new Exception("Can't set course status to prewious one");
+				throw new BLException("Can't set course status to prewious one");
 			}
 
 			course.Status = newStatus.Status;
@@ -352,12 +353,12 @@ namespace webNet_courses.Services
 
 			if (course == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("Course not found");
 			}
 
 			if (course.Status != CourseStatuses.OpenForAssignig)
 			{
-				throw new Exception("You can't sign up to the course that is not open for assigning");
+				throw new BLException("You can't sign up to the course that is not open for assigning");
 			}
 
 			bool isTeacher = course.Teachers.Any(t => t.User.Id == user.Id);
@@ -368,17 +369,17 @@ namespace webNet_courses.Services
 
 			if (studentsCount >= course.MaximumStidetsCount)
 			{
-				throw new Exception("Course is fullfilled with students");
+				throw new BLException("Course is fullfilled with students");
 			}
 
 			if (isTeacher)
 			{
-				throw new Exception("User is teacher");
+				throw new BLException("User is teacher");
 			}
 
 			if (isAlreadyStudent)
 			{
-				throw new Exception("User is already student");
+				throw new BLException("User is already student");
 			}
 
 			CampusCourseStudent newRelationship = new CampusCourseStudent

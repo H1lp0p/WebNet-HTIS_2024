@@ -9,6 +9,7 @@ using webNet_courses.Abstruct;
 using webNet_courses.API.DTO;
 using webNet_courses.API.Mappers;
 using webNet_courses.Domain.Entities;
+using webNet_courses.Domain.Excpetions;
 using webNet_courses.Persistence;
 
 namespace webNet_courses.API.Controllers
@@ -41,6 +42,9 @@ namespace webNet_courses.API.Controllers
 			_httpContextAccessor = httpContextAccessor;
 		}
 
+		///<summary>Register new user</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="400">BadRequest</responce>>
 		[HttpPost]
 		[AllowAnonymous]
 		[Route("/registration")]
@@ -50,7 +54,7 @@ namespace webNet_courses.API.Controllers
 			{
 				if (register.Password != register.ConfirmPassword)
 				{
-					return BadRequest("password and it's confirmations doesn't match");
+					throw new BLException("password and it's confirmations doesn't match");
 				}
 
 				User newUser = new User
@@ -80,6 +84,9 @@ namespace webNet_courses.API.Controllers
 			return BadRequest(ModelState);
 		}
 
+		///<summary>Login</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="400">BadRequest</responce>>
 		[HttpPost]
 		[Route("/login")]
 		[AllowAnonymous]
@@ -90,14 +97,10 @@ namespace webNet_courses.API.Controllers
 				User? user = await _userManager.FindByEmailAsync(login.Email);
 				if (user == null)
 				{
-					return NotFound();
+					throw new BLException("User not found");
 				}
 
 				var loginResult = await _signInManager.PasswordSignInAsync(user, login.Password, true, false);
-				if (!loginResult.Succeeded)
-				{
-					throw new Exception(loginResult.ToString());
-				}
 
 				var jwt = await _userService.GenerateToken(user);
 
@@ -107,6 +110,9 @@ namespace webNet_courses.API.Controllers
 		}
 
 		//TODO: 
+		///<summary>Logout</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
 		[HttpPost]
 		[Route("logout")]
 		public async Task<IActionResult> Logout()
@@ -115,6 +121,10 @@ namespace webNet_courses.API.Controllers
 			return Ok();
 		}
 
+		///<summary>Edit user's data</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <response code="400">BadRequest</response>
+		/// <responce code="401">Unauthorized</responce>>
 		[HttpPut]
 		[Route("/profile")]
 		public async Task<ActionResult<ProfileModel>> Edit(UserEditModel edit)
@@ -123,17 +133,16 @@ namespace webNet_courses.API.Controllers
 			{
 				User user = (await _userManager.GetUserAsync(User))!;
 				bool editRes = await _userService.edit(user.Id, edit.FullName, edit.BirthDate);
-				if (!editRes)
-				{
-					throw new Exception("Something went wrong in edit");
-				}
-
 				user = (await _userManager.GetUserAsync(User))!;
 				return Ok(user.Profile());
 			}
 			return BadRequest(ModelState);
 		}
 
+		///<summary>Get user's profile</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <response code="400">BadRequest</response>
+		/// <responce code="401">Unauthorized</responce>>
 		[HttpGet]
 		[Route("/profile")]
 		public async Task<ActionResult<ProfileModel>> Profile()
@@ -142,6 +151,10 @@ namespace webNet_courses.API.Controllers
 			return user.Profile();
 		}
 
+		///<summary>Set user as admin [for dev]</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="400">BadRequest</responce>>
+		/// <responce code="401">Unauthorized</responce>>
 		[HttpPost]
 		[Route("/setAdmin")]
 		public async Task<IActionResult> SetAdmin()

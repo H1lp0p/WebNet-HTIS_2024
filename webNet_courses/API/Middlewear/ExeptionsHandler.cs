@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using webNet_courses.API.DTO;
+using webNet_courses.Domain.Excpetions;
 
 namespace webNet_courses.API.Middlewear
 {
@@ -7,9 +8,18 @@ namespace webNet_courses.API.Middlewear
 	{
 		public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
 		{
-			if (exception is not SystemException)
+			
+			if (exception is FileNotFoundException)
 			{
-				return false;
+				httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+			}
+			else if (exception is UnathorizedException)
+			{
+				httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+			}
+			else if (exception is BLException)
+			{
+				httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
 			}
 
 			var response = new Response

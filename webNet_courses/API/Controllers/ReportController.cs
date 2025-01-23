@@ -22,6 +22,11 @@ namespace webNet_courses.API.Controllers
 			_reportsService = reportsService;
 		}
 
+
+		///<summary>Get report</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
+		/// <responce code="403">Forbidden</responce>>
 		[HttpGet]
 		[Route("")]
 		public async Task<ActionResult<ICollection<TeacherReportRecordModel>>> getReport
@@ -30,14 +35,7 @@ namespace webNet_courses.API.Controllers
 			[FromQuery] List<Guid> campusGroupIds
 			)
 		{
-			try
-			{
-				return Ok(await _reportsService.getReport(semester, campusGroupIds));
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			return Ok(await _reportsService.getReport(semester, campusGroupIds));
 		}
 
 	}

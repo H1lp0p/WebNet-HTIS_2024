@@ -22,93 +22,73 @@ namespace webNet_courses.API.Controllers
 			_groupService = groupService;
 		}
 
+
+		///<summary>Get list of group's courses</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
 		[HttpGet]
 		public async Task<ActionResult<ICollection<CampusGroupModel>>> GroupList()
 		{
-			try
-			{
-				return Ok(await _groupService.groupList());
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			return Ok(await _groupService.groupList());
 		}
 
+		///<summary>Create group</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
+		/// <responce code="403">Forbidden</responce>>
 		[HttpPost]
 		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<CampusGroupModel>> CreateGroup(CUGroupModel newGroup)
 		{
-			try
-			{
-				return Ok(await _groupService.create(newGroup));
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
-			
+			return Ok(await _groupService.create(newGroup));
+
 		}
 
+		///<summary>Edit group</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
+		/// <responce code="403">Forbidden</responce>>
 		[HttpPut]
 		[Authorize(Roles = "Admin")]
 		[Route("{id}")]
 		public async Task<ActionResult<CampusGroupModel>> Edit([FromRoute] Guid id, CUGroupModel edit)
 		{
-			try
-			{
-				return Ok(await _groupService.update(id, edit));
-			}
-			catch(Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			return Ok(await _groupService.update(id, edit));
 		}
 
+		///<summary>Delete group</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
+		/// <responce code="403">Forbidden</responce>>
 		[HttpDelete]
 		[Authorize(Roles = "Admin")]
 		[Route("{id}")]
 		public async Task<IActionResult> Delete([FromRoute] Guid id)
 		{
-			try
-			{
-				return Ok(await _groupService.delete(id));
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			return Ok(await _groupService.delete(id));
 		}
 
+		///<summary>Get list of all group's courses</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
 		[HttpGet]
 		[Route("{id}")]
 		public async Task<ActionResult<List<CoursePreviewModel>>> GetCourseList([FromRoute] Guid id)
 		{
-			try
-			{
-				return Ok(await _groupService.courseList(id));
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			return Ok(await _groupService.courseList(id));
 		}
 
+
+		///<summary>Create course</summary>
+		/// <responce code="200">Succeded</responce>>
+		/// <responce code="401">Unauthorized</responce>>
+		/// <responce code="403">Forbidden</responce>>
 		[HttpPost]
 		[Route("{groupId}")]
 		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ICollection<CoursePreviewModel>>> CreateCourse([FromRoute] Guid groupId, CreateCourseModel newCourse)
 		{
 			return Ok(await _groupService.addCourse(groupId, newCourse));
-
-			/*try
-			{
-				
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}*/
 		}
 	}
 }

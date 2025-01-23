@@ -9,6 +9,7 @@ using webNet_courses.Abstruct;
 using webNet_courses.API.DTO;
 using webNet_courses.API.Mappers;
 using webNet_courses.Domain.Entities;
+using webNet_courses.Domain.Excpetions;
 using webNet_courses.Persistence;
 
 namespace webNet_courses.Services
@@ -39,7 +40,7 @@ namespace webNet_courses.Services
 			User? user = await _userManager.FindByIdAsync(userId.ToString());
 			if (user == null)
 			{
-				return false;
+				throw new FileNotFoundException("User not found");
 			}
 
 			user.FullName = newFullName;
@@ -92,7 +93,7 @@ namespace webNet_courses.Services
 			User? user = await _userManager.FindByIdAsync(id.ToString());
 			if (user == null)
 			{
-				throw new Exception("Not found");
+				throw new FileNotFoundException("User not found");
 			}
 			var result = user.toRolesDto(await _userManager.IsInRoleAsync(user, "Admin"));
 			return result; 
